@@ -39,43 +39,45 @@
     NSLog(@"%s", __func__);
     // 1.创建子线程相关的RunLoop，在子线程中创建即可，并且RunLoop中要至少有一个Timer 或 一个Source 保证RunLoop不会因为空转而退出，因此在创建的时候直接加入
     // 添加Source [NSMachPort port] 添加一个端口
-    [[NSRunLoop currentRunLoop] addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
-    //添加timer
-//    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(test) userInfo:nil repeats:YES];
-    NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 target:self selector:@selector(test) userInfo:nil repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-    [timer fire];
-    //创建监听者
-    CFRunLoopObserverRef observer = CFRunLoopObserverCreateWithHandler(CFAllocatorGetDefault(), kCFRunLoopAllActivities, YES, 0, ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
-        switch (activity) {
-            case kCFRunLoopEntry:
-                NSLog(@"RunLoop进入");
-                break;
-            case kCFRunLoopBeforeTimers:
-                NSLog(@"RunLoop要处理Timers了");
-                break;
-            case kCFRunLoopBeforeSources:
-                NSLog(@"RunLoop要处理Sources了");
-                break;
-            case kCFRunLoopBeforeWaiting:
-                NSLog(@"RunLoop要休息了");
-                break;
-            case kCFRunLoopAfterWaiting:
-                NSLog(@"RunLoop醒来了");
-                break;
-            case kCFRunLoopExit:
-                NSLog(@"RunLoop退出了");
-                break;
-                
-            default:
-                break;
-        }
-    });
-    //给RunLoop添加监听者
-    CFRunLoopAddObserver(CFRunLoopGetCurrent(), observer, kCFRunLoopDefaultMode);
-    //子线程需要开启RunLoop
-    [[NSRunLoop currentRunLoop] run];
-    CFRelease(observer);
+    @autoreleasepool {
+        [[NSRunLoop currentRunLoop] addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
+        //添加timer
+        //    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(test) userInfo:nil repeats:YES];
+        NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 target:self selector:@selector(test) userInfo:nil repeats:YES];
+        [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+        [timer fire];
+        //创建监听者
+        CFRunLoopObserverRef observer = CFRunLoopObserverCreateWithHandler(CFAllocatorGetDefault(), kCFRunLoopAllActivities, YES, 0, ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
+            switch (activity) {
+                case kCFRunLoopEntry:
+                    NSLog(@"RunLoop进入");
+                    break;
+                case kCFRunLoopBeforeTimers:
+                    NSLog(@"RunLoop要处理Timers了");
+                    break;
+                case kCFRunLoopBeforeSources:
+                    NSLog(@"RunLoop要处理Sources了");
+                    break;
+                case kCFRunLoopBeforeWaiting:
+                    NSLog(@"RunLoop要休息了");
+                    break;
+                case kCFRunLoopAfterWaiting:
+                    NSLog(@"RunLoop醒来了");
+                    break;
+                case kCFRunLoopExit:
+                    NSLog(@"RunLoop退出了");
+                    break;
+                    
+                default:
+                    break;
+            }
+        });
+        //给RunLoop添加监听者
+        CFRunLoopAddObserver(CFRunLoopGetCurrent(), observer, kCFRunLoopDefaultMode);
+        //子线程需要开启RunLoop
+        [[NSRunLoop currentRunLoop] run];
+        CFRelease(observer);
+    }
 }
 
 - (void)test {
